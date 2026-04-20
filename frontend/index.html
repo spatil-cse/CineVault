@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CineVault — Book Your Experience</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<nav class="navbar" id="navbar">
+  <div class="logo">
+    <span class="logo-icon">⚔</span>
+    <span class="logo-text">CineVault</span>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="#movies">Movies</a>
+    <a href="#about">About</a>
+    <button class="btn-login" onclick="showAuthModal('login')">Login</button>
+    <button class="btn-signup" onclick="showAuthModal('register')">Sign Up</button>
+  </div>
+  <div class="user-info" id="userInfo" style="display:none">
+    <span id="welcomeText"></span>
+    <button class="btn-nav-action" onclick="showMyBookings()">My Bookings</button>
+    <button class="btn-nav-action admin-btn" id="adminBtn" onclick="showAdminPanel()" style="display:none">Admin</button>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()">&#9776;</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-video-bg">
+    <div id="ytPlayerWrapper">
+      <div id="ytPlayer"></div>
+      
+      <div id="ytBlocker" style="position:absolute;inset:0;z-index:2;background:transparent;pointer-events:all;"></div>
+    </div>
+  </div>
+  <div class="hero-video-overlay"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-rain" id="heroRain"></div>
+  <div class="hero-content">
+    <div class="hero-badge" id="heroBadge">&#9654; Loading Trailer...</div>
+    <h1 class="hero-title">
+      <span class="hero-line1">Your Cinematic</span>
+      <em class="hero-line2">Universe Awaits.</em>
+    </h1>
+    <p class="hero-sub">Book tickets for the greatest Bollywood blockbusters, regional epics, and everything in between.</p>
+    <div class="hero-actions">
+      <a href="#movies" class="btn-hero-primary">Explore Movies</a>
+      <a href="#movies" class="btn-hero-secondary">Now Showing</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">100+</span><span class="stat-label">Movies</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">50+</span><span class="stat-label">Theatres</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">4K</span><span class="stat-label">Screens</span></div>
+    </div>
+  </div>
+  <div class="hero-video-controls">
+    <button class="video-mute-btn" id="videoMuteBtn" onclick="toggleVideoMute()" title="Toggle trailer sound">
+      <span id="muteIcon">&#128263;</span>
+    </button>
+  </div>
+  <div class="hero-scroll-indicator">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<section class="search-section" id="movies">
+  <div class="search-container">
+    <div class="search-bar">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="searchInput" placeholder="Search movies, directors, actors..." oninput="filterMovies()" onkeyup="filterMovies()" autocomplete="off"/>
+      <button class="search-clear" onclick="clearSearch()">&#10005;</button>
+    </div>
+    <div class="genre-filters" id="genreFilters">
+      <button class="genre-pill active" onclick="filterByGenre('All', this)">All</button>
+      <button class="genre-pill" onclick="filterByGenre('Action', this)">&#9876; Action</button>
+      <button class="genre-pill" onclick="filterByGenre('Drama', this)">&#127917; Drama</button>
+      <button class="genre-pill" onclick="filterByGenre('Thriller', this)">&#128293; Thriller</button>
+      <button class="genre-pill" onclick="filterByGenre('Romance', this)">&#128149; Romance</button>
+      <button class="genre-pill" onclick="filterByGenre('Comedy', this)">&#128514; Comedy</button>
+      <button class="genre-pill" onclick="filterByGenre('Sci-Fi', this)">&#128640; Sci-Fi</button>
+      <button class="genre-pill" onclick="filterByGenre('Horror', this)">&#128123; Horror</button>
+      <button class="genre-pill" onclick="filterByGenre('Fantasy', this)">&#129497; Fantasy</button>
+      <button class="genre-pill" onclick="filterByGenre('Historical', this)">&#127984; Historical</button>
+      <button class="genre-pill" onclick="filterByGenre('Biographical', this)">&#127901; Biographical</button>
+      <button class="genre-pill" onclick="filterByGenre('Crime', this)">&#128373; Crime</button>
+    </div>
+    <div class="sort-row">
+      <span class="results-count" id="resultsCount">Loading movies...</span>
+      <div class="sort-group">
+        <select id="sortSelect" onchange="sortMovies()" class="sort-select">
+          <option value="default">Sort: Featured</option>
+          <option value="rating">Highest Rated</option>
+          <option value="name">A-Z</option>
+          <option value="duration">Duration</option>
+        </select>
+        <select id="langSelect" onchange="filterMovies()" class="sort-select">
+          <option value="All">All Languages</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Tamil">Tamil</option>
+          <option value="Telugu">Telugu</option>
+          <option value="Malayalam">Malayalam</option>
+          <option value="Kannada">Kannada</option>
+          <option value="Bengali">Bengali</option>
+          <option value="Marathi">Marathi</option>
+          <option value="Punjabi">Punjabi</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="movies-section">
+  <div class="section-header">
+    <h2 class="section-title">Now Showing</h2>
+    <div class="title-line"></div>
+  </div>
+  <div class="movies-grid" id="moviesGrid">
+    <div class="loading-state">
+      <div class="loading-spinner-large"></div>
+      <p>Loading movies...</p>
+    </div>
+  </div>
+</section>
+
+<div class="modal-overlay" id="bookingModal" style="display:none">
+  <div class="modal booking-modal">
+    <button class="modal-close" onclick="closeModal('bookingModal')">&#10005;</button>
+    <div class="booking-layout">
+      <div class="booking-left">
+        <div class="modal-poster-wrap">
+          <img id="modalPoster" src="" alt="" class="modal-poster"/>
+          <div class="modal-poster-placeholder" id="modalPosterPlaceholder" style="display:none">&#127916;</div>
+        </div>
+        <div class="movie-detail-card">
+          <h3 id="modalTitle"></h3>
+          <div class="detail-tags">
+            <span class="dtag" id="modalGenreTag"></span>
+            <span class="dtag" id="modalLangTag"></span>
+          </div>
+          <div class="detail-rows">
+            <div class="detail-row"><span>&#9201; Duration</span><span id="modalDuration"></span></div>
+            <div class="detail-row"><span>&#11088; Rating</span><span class="rating-chip" id="modalRating"></span></div>
+            <div class="detail-row"><span>&#127916; Director</span><span id="modalDirector"></span></div>
+          </div>
+          <p class="modal-desc" id="modalDesc"></p>
+        </div>
+      </div>
+      <div class="booking-right">
+        <div class="booking-right-header">
+          <h2>Book Seats</h2>
+          <div class="price-info">&#8377;<span id="ticketPriceDisplay">250</span> / seat</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">&#128197; Select Date</label>
+          <div class="pills-row" id="datePills"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">&#9200; Select Showtime</label>
+          <div class="pills-row" id="timePills"></div>
+        </div>
+        <div class="screen-area">
+          <div class="screen-glow"></div>
+          <div class="screen-bar">-- SCREEN --</div>
+        </div>
+        <div class="seat-grid" id="seatGrid"></div>
+        <div class="seat-legend">
+          <span class="leg"><span class="leg-dot available"></span>Available</span>
+          <span class="leg"><span class="leg-dot selected"></span>Selected</span>
+          <span class="leg"><span class="leg-dot booked"></span>Booked</span>
+        </div>
+        <div class="booking-summary-card">
+          <div class="summary-row"><span>&#127903; Selected Seats</span><span id="selectedSeatsText">None</span></div>
+          <div class="summary-row"><span>&#127916; Movie</span><span id="summaryMovie"></span></div>
+          <div class="summary-row total-row"><span>&#128176; Total</span><span id="totalPrice">&#8377;0</span></div>
+        </div>
+        <button class="btn-confirm" onclick="confirmBooking()">
+          <span>Confirm &amp; Book</span>
+          <span class="btn-arrow">&#8594;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="authModal" style="display:none">
+  <div class="modal auth-modal">
+    <button class="modal-close" onclick="closeModal('authModal')">&#10005;</button>
+    <div class="auth-header">
+      <div class="auth-logo">&#9876; CineVault</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab" id="registerTab" onclick="switchAuthTab('register')">Register</button>
+    </div>
+    <div id="loginForm">
+      <h2>Welcome Back</h2>
+      <p class="auth-sub">Sign in to your account to continue</p>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="loginPassword" placeholder="••••••••"/>
+      </div>
+      <div class="auth-error" id="loginError"></div>
+      <button class="btn-confirm" onclick="login()">Login</button>
+    </div>
+    <div id="registerForm" style="display:none">
+      <h2>Create Account</h2>
+      <p class="auth-sub">Join CineVault today</p>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" id="regName" placeholder="John Doe"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="regEmail" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="regPassword" placeholder="••••••••"/>
+      </div>
+      <div class="auth-error" id="registerError"></div>
+      <button class="btn-confirm" onclick="register()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="bookingsModal" style="display:none">
+  <div class="modal bookings-modal">
+    <button class="modal-close" onclick="closeModal('bookingsModal')">&#10005;</button>
+    <div class="bookings-header">
+      <h2>&#127903; My Bookings</h2>
+      <p>Your movie journey</p>
+    </div>
+    <div id="bookingsList" class="bookings-list"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ticketModal" style="display:none">
+  <div class="modal ticket-modal">
+    <button class="modal-close" onclick="closeModal('ticketModal')">&#10005;</button>
+    <div id="ticketContent" class="ticket-content"></div>
+    <div class="ticket-actions">
+      <button class="btn-download" onclick="downloadPDFTicket()">&#11015; Download PDF Ticket</button>
+      <button class="btn-confirm" onclick="closeModal('ticketModal')">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminModal" style="display:none">
+  <div class="modal admin-modal">
+    <button class="modal-close" onclick="closeModal('adminModal')">&#10005;</button>
+    <div class="admin-header">
+      <h2>&#9881; Admin Dashboard</h2>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('stats', this)">&#128202; Stats</button>
+      <button class="admin-tab" onclick="switchAdminTab('movies', this)">&#127916; Movies</button>
+      <button class="admin-tab" onclick="switchAdminTab('bookings', this)">&#127903; Bookings</button>
+      <button class="admin-tab" onclick="switchAdminTab('add', this)">&#10133; Add Movie</button>
+    </div>
+    <div id="adminContent" class="admin-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">&#9876; CineVault</div>
+    <p class="footer-tagline">Crafted for the love of Indian cinema</p>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+    <p class="footer-copy">&#169; 2026 CineVault. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="app.js?v=kantara1"></script>
+</body>
+</html>
