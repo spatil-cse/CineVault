@@ -47,7 +47,7 @@ movie-booking/
 
 | Tool | Version |
 |------|---------|
-| Java | 17+ |
+| Java | 21+ |
 | Maven | 3.8+ |
 | MySQL | 8.0+ |
 | Node / Live Server | Optional (for serving HTML) |
@@ -69,7 +69,7 @@ mysql -u root -p < database/schema.sql
 This creates:
 - `cinevault` database
 - `users`, `movies`, `bookings` tables
-- 8 sample movies
+- 100 sample movies
 - 1 admin user (`admin@cinevault.com` / `admin123`)
 
 ---
@@ -229,7 +229,7 @@ curl "http://localhost:8080/api/bookings/seats?movieId=1&date=2025-08-15&time=07
 | Layer | Technology |
 |-------|-----------|
 | Frontend | HTML5, CSS3 (custom), Vanilla JavaScript |
-| Backend | Java 17, Spring Boot 3.2 |
+| Backend | Java 21, Spring Boot 3.3.6 |
 | Security | Spring Security + JWT (jjwt) |
 | Database | MySQL 8.0 |
 | ORM | Spring Data JPA / Hibernate |
